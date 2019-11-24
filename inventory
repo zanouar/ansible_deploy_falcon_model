@@ -1,6 +1,6 @@
 [Scoring_Server]
-plpriap349.desjardins.com
+FQDN
 [Tomcat_Server]
-plpriap357.desjardins.com
+FQDN
 [Couchbase_Server]
-plpriap351.desjardins.com
+FQDN
