@@ -1,0 +1,19 @@
+
+- name: Backup1 ScoringServer Configuration Files
+  command: "tar czf fal.gtar {{ falcon_config_dir }} -X {{ falcon_backup_exclusions }}"
+  args:
+      chdir: "{{ falcon_backup_dir }}"
+
+- name: Backup2 ScoringServer Configuration Files
+  copy:
+      src: "{{ item }}"
+      dest: "{{ falcon_backup_dir }}/TMP_BACKUP_CONFIG_IDM12/"
+  with_items:
+      - /fic/fal6/conf
+      - /fic/fal6/pmax/etc
+      - /fic/fal6/pmax/bin
+      - /fic/fal6/pmax/util
+
+
+
+

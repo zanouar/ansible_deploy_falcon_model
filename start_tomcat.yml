@@ -1,0 +1,22 @@
+---
+- name: Start {{ tomcat_item }}
+  become_user: "{{ tomcat_item.value.user }}"
+  service:
+    name: "{{ tomcat_item.value.name }}"
+    state: started
+
+- name: Wait for Tomcat to Start 
+  command: "sleep 40"
+
+- name: Check State of {{ tomcat_item.value.name }}
+  shell: "ps -ef | grep -v grep | grep {{ tomcat_item.value.name }} | grep java | awk '{print $2 }' "
+  register: process_state
+
+- debug:
+    msg: -> "{% if process_state.stdout == '' -%}"
+            Service {{ tomcat_item.value.name }} is STOPPED
+           "{% else -%}"
+            Service {{ tomcat_item.value.name }} is STARTED 
+            'PIDs :' {{ process_state.stdout_lines }}
+           "{% endif -%}"
+  register: tomcat_output  

@@ -1,0 +1,28 @@
+- name: Start Scoring Server
+  shell: scoring_server.ksh start > {{ falcon_log_dir }}/start_scoringserver.log"
+  args:   
+    chdir: "{{ falcon_script_dir }}"
+
+- name: Ensure that Scoring Server is STARTED
+  wait_for:
+    path: "{{falcon_log_dir }}/start_scoringserver.log"
+    search_regex: "exiting with rc 0"
+    msg: "Falcon is not Running, Please Verify manualy !"
+    timeout: 60
+     
+- name: Verify Scoring Server process
+  shell: FalconProcess.sh > {{ falcon_log_dir }}/stats_process_scoringserver_up.log"
+  args:
+    chdir: "{{ falcon_script_dir }}"
+
+- name: Verify Process output
+  shell: "cat {{ falcon_lo_dir }}/stats_process_scoringserver_up | grep Verification | awk -F - '{print $2 }' | awk -F : '{ print $1 }' | uniq | wc -l"
+  register: process_output
+
+- name: Test
+  debug:
+     msg: "{% if process_output.stdout  == '1' -%} OK {% else -%} KO {% endif -%}"
+  register: process_output2
+  failed_when: "process_output2.msg == 'KO' "
+
+       

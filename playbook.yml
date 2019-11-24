@@ -1,0 +1,54 @@
+---
+# Stop Scoring Server
+#
+- name: Deploy Model V13 Falcon DEBIT 
+  hosts: all
+  vars: 
+        falcon_script_dir: /fic/fal6/pmax/util
+        falcon_log_dir: /fic/fal6/pmax/bin/logs
+        falcon_backup_dir: /backup/backupFFM
+        falcon_config_dir: /fic/fal6
+        falcon_backup_exclusions: /home/pmax/exclusions
+        falcon_model: DEBIT
+        package_model: /fic/releaseTarExtract/debitmodel/IDM13.encryted.tar
+        tomcat_instances:
+                 instance1:
+                   user: tomcat1
+                   name: tomcat1
+                 instance2:
+                   user: tomcat2
+                   name: tomcat2
+  tasks:
+        - name: Stop Scoring Server
+          include_tasks: stop_scoringserver.yml
+          when: "'Scoring_Server' in {{ group_names }}"
+
+        - name: Stopping Tomcat Server
+          include_tasks: stop_tomcat.yml
+          when: "'Tomcat_Server' in {{ group_names }}"
+          with_dict: "{{ tomcat_instances }}"
+          loop_control:
+           loop_var: "tomcat_item"
+
+        - name: Scoring Server Backup 
+          include_tasks: backup_scoringserver.yml
+          when: "'Scoring_Server' in {{ group_names }}"
+          
+        - name: Couchbase Server Backup
+          include_tasks: Couchbase_Server_Backup.yml
+          when: "'Couchbase_Server' in {{ group_names }}"
+          
+        - name: deploy Falcon Model
+          include_tasks: uninstall_install_model.yml
+          when: "'Scoring_Server' in {{ group_names }}"
+
+        - name: Start Scoring Server
+          include_tasks: start_scoringserver.yml
+          when: "'Scoring_Server' in {{ group_names }}"
+
+        - name: Start Tomcat Server
+          include_tasks: start_tomcat.yml
+          when: "'Tomcat_Server' in {{ group_names }}"
+          with_dict: "{{ tomcat_instances }}"
+          loop_control:
+           loop_var: "tomcat_item"

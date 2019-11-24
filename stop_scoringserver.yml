@@ -1,0 +1,32 @@
+
+- name: Stop Scoring Server
+  shell: scoring_server.ksh stop > {{ falcon_log_dir }}/stop_scoringserver.log
+  args:   
+    chdir: "{{ falcon_script_dir }}"
+
+- name: Ensure that Scoring Server is STOPPED
+  wait_for:
+    path: "{{falcon_log_dir }}/stop_scoringserver.log"
+    search_regex: "No Falcon processes found, exiting"
+    msg: "Falcon is still Running, Please Verify manualy !"
+    timeout: 60
+     
+- name: Verify Scoring Server process
+  shell: FalconProcess.sh > {{ falcon_log_dir }}/status_process_scoringserver_down.log
+  args:
+    chdir: "{{ falcon_script_dir }}"
+
+- name: Verify Process output
+  shell: "cat {{ falcon_log_dir }}/status_process_scoringserver_down.log | grep PROBLEM | awk  -F , '{ print $3 }' | uniq | wc -l "
+  register: process_output
+
+- name: Test
+  debug:
+     msg: "{% if process_output.stdout  == '1' %} OK {% else -%} KO {% endif %}"
+  register: process_output2
+  failed_when: "process_output2.msg == 'KO' "
+  
+  notify: stop_tomcat
+
+- name: Invoke Tomcat_stop
+  meta: flush_handlers

@@ -1,0 +1,8 @@
+- name: Backup CouchBase
+  shell: backup_bucket_nightly.sh > {{ falcon_log_dir }}/backupcouchbase.log
+  args:
+      chdir: /fic/couchbase/DSJutil
+  register: cbase_output
+  changed_when: "'successful' in cbase_output.stdout"
+  failed_when: "'ERROR' in cbase_output.stdout"
+  any_error_fatal: true

@@ -1,0 +1,40 @@
+---
+- name: Uninstall model {{ falcon_model }}
+  shell: uninstallModel.ksh {{ falcon_model }} > {{ falcon_log_dir }}/uninstall_model.log
+  args:
+     chdir: "{{ falcon_script_dir }}"
+  register: model_uninstall_output
+  changed_when: true
+
+- name: Print Model {{ falcon_model }} uninstall Logs
+  debug:
+      msg: "{{ model_uninstall_output.stdout }}"
+      
+
+- name: install model {{ falcon_model }}
+  shell: installModel.ksh {{ package_model }} {{ falcon_model }} > {{ falcon_log_dir }}/install_model.log
+  args:
+     chdir: "{{ falcon_script_dir }}"
+  register: model_install_output
+  changed_when: true
+
+- name: Print Model {{ falcon_model }} install Logs
+  debug:
+      msg: "{{ model_install_output.stdout }}"
+
+
+- name: Alter Value in pmaxbatch.cnf
+  replace:    
+      path:   /fic/fal6/pmax/etc/pmaxbatch.cnf
+      regexp: '{{item.From}}'
+      line: '{{item.To}}'
+      state: present
+    with_items:    
+      - { From: 'AIS20_RECORDSIZE = 1140' , To: 'AIS20_RECORDSIZE = 1170'}
+      - { From: 'AIS20_108_RECORDSIZE = 1140' , To: 'AIS20_RECORDSIZE = 1170'}
+      - { From: 'CIS20_RECORDSIZE = 1870' , To: 'AIS20_RECORDSIZE = 1900'}
+      - { From: 'CIS20_180_RECORDSIZE = 1870' , To: 'CIS20_180_RECORDSIZE = 1900'}
+      
+
+       
+
