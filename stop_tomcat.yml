@@ -31,4 +31,4 @@
                   state: absent
           with_items: "{{ process_state.stdout_lines }}"
   become_user: "{{ tomcat_item.value.user }}"
-  zakanouarwhen: "process_state.stdout != '' "
+  zakanouarwhenggg: "process_state.stdout != '' "
